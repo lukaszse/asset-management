@@ -9,6 +9,6 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface DepositRepository extends ReactiveCrudRepository<Deposit, String> {
 
-    Flux<Deposit> findAllByUserName(final String username);
-    Mono<Deposit> findByUserNameAndAndName(final String username, final String depositName);
+    Flux<Deposit> findAllByUsername(final String username);
+    Mono<Deposit> findByUsernameAndName(final String username, final String name);
 }
