@@ -5,10 +5,10 @@ import pl.com.seremak.assetsmanagement.model.Deposit;
 
 public class DepositConverter {
 
-    public static Deposit toDeposit(final DepositDto depositDto) {
+    public static Deposit toDeposit(final String username, final DepositDto depositDto) {
         final Deposit deposit = new Deposit();
-        deposit.setUsername(deposit.getUsername());
-        deposit.setName(deposit.getName());
+        deposit.setUsername(username);
+        deposit.setName(depositDto.getName());
         deposit.setValue(depositDto.getValue());
         deposit.setDepositType(depositDto.getDepositType());
         deposit.setBankName(depositDto.getBankName());
@@ -16,13 +16,13 @@ public class DepositConverter {
         return deposit;
     }
 
-    public static DepositDto toDeposit(final Deposit deposit) {
+    public static DepositDto toDepositDto(final Deposit deposit) {
         final DepositDto depositDto = new DepositDto();
-        depositDto.setName(depositDto.getName());
-        depositDto.setValue(depositDto.getValue());
-        depositDto.setDepositType(depositDto.getDepositType());
-        depositDto.setBankName(depositDto.getBankName());
-        depositDto.setAnnualInterestRate(depositDto.getAnnualInterestRate());
+        depositDto.setName(deposit.getName());
+        depositDto.setValue(deposit.getValue());
+        depositDto.setDepositType(deposit.getDepositType());
+        depositDto.setBankName(deposit.getBankName());
+        depositDto.setAnnualInterestRate(deposit.getAnnualInterestRate());
         return depositDto;
     }
 }

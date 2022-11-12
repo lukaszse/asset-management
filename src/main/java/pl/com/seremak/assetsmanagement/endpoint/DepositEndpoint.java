@@ -32,13 +32,13 @@ public class DepositEndpoint {
 
 
     @PostMapping(produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> createDeposit(final JwtAuthenticationToken principal,
-                                                      @Valid final DepositDto depositDto) {
+    public Mono<ResponseEntity<Deposit>> createDeposit(final JwtAuthenticationToken principal,
+                                                       @Valid @RequestBody final DepositDto depositDto) {
         final String username = jwtExtractionHelper.extractUsername(principal);
         log.info("Deposit creation request received for username={} and depositName={}", username, depositDto.getName());
-        return depositService.createDeposit(depositDto)
+        return depositService.createDeposit(username, depositDto)
                 .doOnSuccess(createdDeposit -> log.info("Deposit with name={} and username={} created.", createdDeposit.getName(), createdDeposit.getUsername()))
-                .map(deposit -> EndpointUtils.prepareCreatedResponse(DEPOSITS_URI_PATTERN, deposit.getName()));
+                .map(deposit -> EndpointUtils.prepareCreatedResponse(DEPOSITS_URI_PATTERN, deposit.getName(), deposit));
     }
 
     @GetMapping(produces = APPLICATION_JSON_VALUE)
@@ -50,10 +50,33 @@ public class DepositEndpoint {
     }
 
     @GetMapping(value = "{depositName}", produces = APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<Deposit>> findDeposit(final JwtAuthenticationToken principal, @PathVariable final String depositName) {
+    public Mono<ResponseEntity<Deposit>> findDeposit(final JwtAuthenticationToken principal,
+                                                     @PathVariable final String depositName) {
         final String username = jwtExtractionHelper.extractUsername(principal);
         return depositService.findDepositByName(username, depositName)
                 .doOnSuccess(deposit -> log.info("Deposit with name={} and username={} found.", deposit.getName(), deposit.getUsername()))
                 .map(ResponseEntity::ok);
+    }
+
+    @PatchMapping(value = "{depositName}", produces = APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<Deposit>> updateDeposit(final JwtAuthenticationToken principal,
+                                                       @Valid @RequestBody final DepositDto depositDto,
+                                                       @PathVariable final String depositName) {
+        final String username = jwtExtractionHelper.extractUsername(principal);
+        return depositService.updateDeposit(username, depositDto)
+                .doOnSuccess(updatedDeposit ->
+                        log.info("Deposit with name={} and username={} updated.", updatedDeposit.getName(), updatedDeposit.getUsername()))
+                .map(ResponseEntity::ok);
+    }
+
+    @DeleteMapping(value = "{depositName}")
+    public Mono<ResponseEntity<Void>> deleteDeposit(final JwtAuthenticationToken principal,
+                                                    @Valid @RequestBody final DepositDto depositDto,
+                                                    @PathVariable final String depositName) {
+        final String username = jwtExtractionHelper.extractUsername(principal);
+        return depositService.updateDeposit(username, depositDto)
+                .doOnSuccess(updatedDeposit ->
+                        log.info("Deposit with name={} and username={} updated.", updatedDeposit.getName(), updatedDeposit.getUsername()))
+                .map(__ -> ResponseEntity.noContent().build());
     }
 }

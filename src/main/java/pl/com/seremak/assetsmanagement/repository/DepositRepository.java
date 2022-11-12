@@ -11,4 +11,6 @@ public interface DepositRepository extends ReactiveCrudRepository<Deposit, Strin
 
     Flux<Deposit> findAllByUsername(final String username);
     Mono<Deposit> findByUsernameAndName(final String username, final String name);
+
+    Mono<Deposit> deleteByUsernameAndName(final String username, final String name);
 }
