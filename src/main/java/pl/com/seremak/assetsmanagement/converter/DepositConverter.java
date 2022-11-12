@@ -15,4 +15,14 @@ public class DepositConverter {
         deposit.setAnnualInterestRate(depositDto.getAnnualInterestRate());
         return deposit;
     }
+
+    public static DepositDto toDeposit(final Deposit deposit) {
+        final DepositDto depositDto = new DepositDto();
+        depositDto.setName(depositDto.getName());
+        depositDto.setValue(depositDto.getValue());
+        depositDto.setDepositType(depositDto.getDepositType());
+        depositDto.setBankName(depositDto.getBankName());
+        depositDto.setAnnualInterestRate(depositDto.getAnnualInterestRate());
+        return depositDto;
+    }
 }
