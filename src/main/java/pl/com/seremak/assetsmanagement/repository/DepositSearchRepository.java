@@ -7,8 +7,8 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
-import pl.com.seremak.assetsmanagement.model.Deposit;
-import pl.com.seremak.assetsmanagement.utils.MongoQueryHelper;
+import pl.com.seremak.simplebills.commons.model.Deposit;
+import pl.com.seremak.simplebills.commons.utils.MongoQueryHelper;
 import reactor.core.publisher.Mono;
 
 @Repository

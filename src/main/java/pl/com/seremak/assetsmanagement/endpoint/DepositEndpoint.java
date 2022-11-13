@@ -6,11 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
-import pl.com.seremak.assetsmanagement.dto.DepositDto;
-import pl.com.seremak.assetsmanagement.model.Deposit;
 import pl.com.seremak.assetsmanagement.service.DepositService;
-import pl.com.seremak.assetsmanagement.utils.EndpointUtils;
-import pl.com.seremak.assetsmanagement.utils.JwtExtractionHelper;
+import pl.com.seremak.simplebills.commons.dto.http.DepositDto;
+import pl.com.seremak.simplebills.commons.model.Deposit;
+import pl.com.seremak.simplebills.commons.utils.EndpointUtils;
+import pl.com.seremak.simplebills.commons.utils.JwtExtractionHelper;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
@@ -28,13 +28,11 @@ public class DepositEndpoint {
     public static final String DEPOSITS_URI_PATTERN = "/deposits/%s";
 
     private final DepositService depositService;
-    private final JwtExtractionHelper jwtExtractionHelper;
-
 
     @PostMapping(produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Deposit>> createDeposit(final JwtAuthenticationToken principal,
                                                        @Valid @RequestBody final DepositDto depositDto) {
-        final String username = jwtExtractionHelper.extractUsername(principal);
+        final String username = JwtExtractionHelper.extractUsername(principal);
         log.info("Deposit creation request received for username={} and depositName={}", username, depositDto.getName());
         return depositService.createDeposit(username, depositDto)
                 .doOnSuccess(createdDeposit -> log.info("Deposit with name={} and username={} created.", createdDeposit.getName(), createdDeposit.getUsername()))
@@ -43,7 +41,7 @@ public class DepositEndpoint {
 
     @GetMapping(produces = APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<List<Deposit>>> findDeposits(final JwtAuthenticationToken principal) {
-        final String username = jwtExtractionHelper.extractUsername(principal);
+        final String username = JwtExtractionHelper.extractUsername(principal);
         return depositService.findAllDeposits(username)
                 .doOnSuccess(deposits -> log.info("({} Deposit for username={} found.", deposits.size(), username))
                 .map(ResponseEntity::ok);
@@ -52,7 +50,7 @@ public class DepositEndpoint {
     @GetMapping(value = "{depositName}", produces = APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Deposit>> findDeposit(final JwtAuthenticationToken principal,
                                                      @PathVariable final String depositName) {
-        final String username = jwtExtractionHelper.extractUsername(principal);
+        final String username = JwtExtractionHelper.extractUsername(principal);
         return depositService.findDepositByName(username, depositName)
                 .doOnSuccess(deposit -> log.info("Deposit with name={} and username={} found.", deposit.getName(), deposit.getUsername()))
                 .map(ResponseEntity::ok);
@@ -62,7 +60,7 @@ public class DepositEndpoint {
     public Mono<ResponseEntity<Deposit>> updateDeposit(final JwtAuthenticationToken principal,
                                                        @Valid @RequestBody final DepositDto depositDto,
                                                        @PathVariable final String depositName) {
-        final String username = jwtExtractionHelper.extractUsername(principal);
+        final String username = JwtExtractionHelper.extractUsername(principal);
         return depositService.updateDeposit(username, depositDto)
                 .doOnSuccess(updatedDeposit ->
                         log.info("Deposit with name={} and username={} updated.", updatedDeposit.getName(), updatedDeposit.getUsername()))
@@ -73,7 +71,7 @@ public class DepositEndpoint {
     public Mono<ResponseEntity<Void>> deleteDeposit(final JwtAuthenticationToken principal,
                                                     @Valid @RequestBody final DepositDto depositDto,
                                                     @PathVariable final String depositName) {
-        final String username = jwtExtractionHelper.extractUsername(principal);
+        final String username = JwtExtractionHelper.extractUsername(principal);
         return depositService.updateDeposit(username, depositDto)
                 .doOnSuccess(updatedDeposit ->
                         log.info("Deposit with name={} and username={} updated.", updatedDeposit.getName(), updatedDeposit.getUsername()))

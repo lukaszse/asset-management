@@ -4,16 +4,15 @@ package pl.com.seremak.assetsmanagement.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import pl.com.seremak.assetsmanagement.converter.DepositConverter;
-import pl.com.seremak.assetsmanagement.dto.DepositDto;
-import pl.com.seremak.assetsmanagement.model.Deposit;
 import pl.com.seremak.assetsmanagement.repository.DepositRepository;
 import pl.com.seremak.assetsmanagement.repository.DepositSearchRepository;
+import pl.com.seremak.simplebills.commons.dto.http.DepositDto;
+import pl.com.seremak.simplebills.commons.model.Deposit;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-import static pl.com.seremak.assetsmanagement.converter.DepositConverter.toDeposit;
+import static pl.com.seremak.simplebills.commons.converter.DepositConverter.toDeposit;
 
 @Slf4j
 @Service
@@ -43,7 +42,7 @@ public class DepositService {
     }
 
     public Mono<Deposit> updateDeposit(final String username, final DepositDto depositDto) {
-        final Deposit deposit = DepositConverter.toDeposit(username, depositDto);
+        final Deposit deposit = toDeposit(username, depositDto);
         return depositSearchRepository.updateDeposit(deposit)
                 .doOnNext(updatedDeposit ->
                         log.info("Deposit with name={} and username={} updated.", updatedDeposit.getName(), updatedDeposit.getUsername()));
