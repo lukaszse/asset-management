@@ -2,12 +2,12 @@ plugins {
 	id 'org.springframework.boot' version '2.7.5'
 	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 	id 'java'
+	id 'groovy'
 }
 
 group = 'pl.com.seremak'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '17'
-
 
 configurations {
 	compileOnly {
@@ -32,7 +32,7 @@ ext {
 }
 
 dependencies {
-	implementation 'pl.com.seremak.simplebills:commons:0.0.25'
+	implementation 'pl.com.seremak.simplebills:commons:0.0.26'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'

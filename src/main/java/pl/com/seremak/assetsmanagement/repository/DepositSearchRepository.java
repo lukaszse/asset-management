@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class DepositSearchRepository {
 
-    private ReactiveMongoTemplate reactiveMongoTemplate;
+    private final ReactiveMongoTemplate reactiveMongoTemplate;
 
     public Mono<Deposit> updateDeposit(final Deposit deposit) {
         return reactiveMongoTemplate.findAndModify(
