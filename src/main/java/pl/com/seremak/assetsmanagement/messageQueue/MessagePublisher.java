@@ -6,7 +6,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 import pl.com.seremak.simplebills.commons.dto.http.TransactionDto;
 
-import static pl.com.seremak.assetsmanagement.config.RabbitMQConfig.TRANSACTION_CREATION_REQUEST_QUEUE;
+import static pl.com.seremak.simplebills.commons.constants.MessageQueue.TRANSACTION_CREATION_REQUEST_QUEUE;
 
 @Slf4j
 @Component
