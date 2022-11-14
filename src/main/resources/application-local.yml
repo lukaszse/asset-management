@@ -21,5 +21,4 @@ server:
 
 custom-properties:
   simpleBillsGuiAppUrl: "http://localhost:8089"
-  simpleBillsUrl: "http://localhost:8081"
   billsPlanUrl: "http://localhost:8081"

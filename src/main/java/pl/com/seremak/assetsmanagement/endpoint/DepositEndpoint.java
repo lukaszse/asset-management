@@ -34,7 +34,7 @@ public class DepositEndpoint {
                                                        @Valid @RequestBody final DepositDto depositDto) {
         final String username = JwtExtractionHelper.extractUsername(principal);
         log.info("Deposit creation request received for username={} and depositName={}", username, depositDto.getName());
-        return depositService.createDeposit(username, depositDto)
+        return depositService.createDeposit(principal, depositDto)
                 .doOnSuccess(createdDeposit -> log.info("Deposit with name={} and username={} created.", createdDeposit.getName(), createdDeposit.getUsername()))
                 .map(deposit -> EndpointUtils.prepareCreatedResponse(DEPOSITS_URI_PATTERN, deposit.getName(), deposit));
     }
@@ -61,7 +61,7 @@ public class DepositEndpoint {
                                                        @Valid @RequestBody final DepositDto depositDto,
                                                        @PathVariable final String depositName) {
         final String username = JwtExtractionHelper.extractUsername(principal);
-        return depositService.updateDeposit(username, depositDto)
+        return depositService.updateDeposit(username, depositName, depositDto)
                 .doOnSuccess(updatedDeposit ->
                         log.info("Deposit with name={} and username={} updated.", updatedDeposit.getName(), updatedDeposit.getUsername()))
                 .map(ResponseEntity::ok);
@@ -69,10 +69,9 @@ public class DepositEndpoint {
 
     @DeleteMapping(value = "{depositName}")
     public Mono<ResponseEntity<Void>> deleteDeposit(final JwtAuthenticationToken principal,
-                                                    @Valid @RequestBody final DepositDto depositDto,
                                                     @PathVariable final String depositName) {
         final String username = JwtExtractionHelper.extractUsername(principal);
-        return depositService.updateDeposit(username, depositDto)
+        return depositService.deleteDeposit(username, depositName)
                 .doOnSuccess(updatedDeposit ->
                         log.info("Deposit with name={} and username={} updated.", updatedDeposit.getName(), updatedDeposit.getUsername()))
                 .map(__ -> ResponseEntity.noContent().build());

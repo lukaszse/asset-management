@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.AmqpAdmin;
-import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -19,9 +18,7 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class RabbitMQConfig {
 
-    public static final String USER_CREATION_QUEUE = "userCreation";
-    public static final String CATEGORY_DELETION_QUEUE = "categoryDeletionQueue";
-    public static final String TRANSACTION_QUEUE = "transaction";
+    public static final String TRANSACTION_CREATION_REQUEST_QUEUE = "transactionCreationRequest";
 
     private final CachingConnectionFactory cachingConnectionFactory;
     private final ObjectMapper objectMapper;
@@ -45,21 +42,5 @@ public class RabbitMQConfig {
     @Bean
     public AmqpAdmin rabbitAdmin() {
         return new RabbitAdmin(cachingConnectionFactory);
-    }
-
-
-    @Bean
-    public Queue userCreationQueue() {
-        return new Queue(USER_CREATION_QUEUE, false);
-    }
-
-    @Bean
-    public Queue categoryDeletionQueue() {
-        return new Queue(CATEGORY_DELETION_QUEUE, false);
-    }
-
-    @Bean
-    public Queue transactionQueue() {
-        return new Queue(TRANSACTION_QUEUE, false);
     }
 }
