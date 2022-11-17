@@ -15,6 +15,7 @@ import pl.com.seremak.simplebills.commons.dto.http.CategoryDto;
 import pl.com.seremak.simplebills.commons.dto.http.DepositDto;
 import pl.com.seremak.simplebills.commons.dto.http.TransactionDto;
 import pl.com.seremak.simplebills.commons.model.Balance;
+import pl.com.seremak.simplebills.commons.model.Category;
 import pl.com.seremak.simplebills.commons.model.Deposit;
 import pl.com.seremak.simplebills.commons.utils.JwtExtractionHelper;
 import reactor.core.publisher.Mono;
@@ -23,7 +24,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-import static pl.com.seremak.simplebills.commons.constants.StandardCategories.ASSETS;
 import static pl.com.seremak.simplebills.commons.converter.DepositConverter.toDeposit;
 import static pl.com.seremak.simplebills.commons.model.Transaction.Type.EXPENSE;
 
@@ -55,7 +55,7 @@ public class DepositService {
         final Jwt token = principal.getToken();
         return billsPlanClient.getBalance(token)
                 .filter(balance -> validateBalance(balance, depositDto.getValue()))
-                .then(billsPlanClient.getCategory(token, ASSETS.toString())
+                .then(billsPlanClient.getCategory(token, username, Category.Type.ASSET.toString().toLowerCase())
                         .switchIfEmpty(billsPlanClient.createCategory(token, prepareAssetsCategory(depositDto))))
                 .then(depositRepository.save(toDeposit(username, depositDto)))
                 .doOnNext(deposit -> messagePublisher.sentTransactionCreationRequest(toTransactionDto(deposit)))
@@ -89,7 +89,7 @@ public class DepositService {
     private static TransactionDto toTransactionDto(final Deposit deposit) {
         return TransactionDto.builder()
                 .user(deposit.getUsername())
-                .category(ASSETS.toString())
+                .category(Category.Type.ASSET.toString())
                 .type(EXPENSE.toString())
                 .amount(deposit.getValue())
                 .date(LocalDate.now())
@@ -106,8 +106,9 @@ public class DepositService {
 
     private static CategoryDto prepareAssetsCategory(final DepositDto depositDto) {
         return CategoryDto.builder()
-                .name(depositDto.getName())
-                .transactionType(ASSETS.name())
+                .type(Category.Type.ASSET)
+                .transactionType(EXPENSE.toString())
+                .name(Category.Type.ASSET.toString().toLowerCase())
                 .build();
     }
 }
