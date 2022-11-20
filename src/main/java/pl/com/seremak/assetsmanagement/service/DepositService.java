@@ -3,28 +3,27 @@ package pl.com.seremak.assetsmanagement.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import pl.com.seremak.assetsmanagement.integration.client.BillsPlanClient;
-import pl.com.seremak.assetsmanagement.messageQueue.MessagePublisher;
+import pl.com.seremak.assetsmanagement.integration.client.TransactionsClient;
 import pl.com.seremak.assetsmanagement.repository.DepositRepository;
 import pl.com.seremak.assetsmanagement.repository.DepositSearchRepository;
 import pl.com.seremak.simplebills.commons.dto.http.CategoryDto;
 import pl.com.seremak.simplebills.commons.dto.http.DepositDto;
-import pl.com.seremak.simplebills.commons.dto.http.TransactionDto;
 import pl.com.seremak.simplebills.commons.model.Balance;
 import pl.com.seremak.simplebills.commons.model.Category;
 import pl.com.seremak.simplebills.commons.model.Deposit;
 import pl.com.seremak.simplebills.commons.utils.JwtExtractionHelper;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
 import static pl.com.seremak.simplebills.commons.converter.DepositConverter.toDeposit;
+import static pl.com.seremak.simplebills.commons.converter.TransactionConverter.toTransactionDto;
 import static pl.com.seremak.simplebills.commons.model.Transaction.Type.EXPENSE;
 
 @Slf4j
@@ -35,7 +34,7 @@ public class DepositService {
     private final DepositRepository depositRepository;
     private final DepositSearchRepository depositSearchRepository;
     private final BillsPlanClient billsPlanClient;
-    private final MessagePublisher messagePublisher;
+    private final TransactionsClient transactionsClient;
 
 
     public Mono<List<Deposit>> findAllDeposits(final String username) {
@@ -57,21 +56,32 @@ public class DepositService {
                 .filter(balance -> validateBalance(balance, depositDto.getValue()))
                 .then(billsPlanClient.getCategory(token, username, Category.Type.ASSET.toString().toLowerCase())
                         .switchIfEmpty(billsPlanClient.createCategory(token, prepareAssetsCategory(depositDto))))
-                .then(depositRepository.save(toDeposit(username, depositDto)))
-                .doOnNext(deposit -> messagePublisher.sentTransactionCreationRequest(toTransactionDto(deposit)))
+                .then(transactionsClient.createTransaction(token, toTransactionDto(depositDto)))
+                .map(depositTransaction -> toDeposit(username, depositTransaction.getTransactionNumber(), depositDto))
+                .flatMap(depositRepository::save)
                 .doOnNext(createdDeposit ->
                         log.info("Deposit with name={} and username={} created.", createdDeposit.getName(), createdDeposit.getUsername()));
     }
 
-    public Mono<Deposit> updateDeposit(final String username, final String depositName, final DepositDto depositDto) {
+    public Mono<Deposit> updateDeposit(final JwtAuthenticationToken principal,
+                                       final String depositName,
+                                       final DepositDto depositDto) {
+        final String username = JwtExtractionHelper.extractUsername(principal);
+        final Jwt token = principal.getToken();
         final Deposit deposit = toDeposit(username, depositName, depositDto);
         return depositSearchRepository.updateDeposit(deposit)
+                .publishOn(Schedulers.boundedElastic())
+                .doOnNext(updatedDeposit -> transactionsClient.updateTransaction(token, toTransactionDto(updatedDeposit)).subscribe())
                 .doOnNext(updatedDeposit ->
                         log.info("Deposit with name={} and username={} updated.", updatedDeposit.getName(), updatedDeposit.getUsername()));
     }
 
-    public Mono<Deposit> deleteDeposit(final String username, final String depositName) {
+    public Mono<Deposit> deleteDeposit(final JwtAuthenticationToken principal, final String depositName) {
+        final String username = JwtExtractionHelper.extractUsername(principal);
+        final Jwt token = principal.getToken();
         return depositRepository.deleteByUsernameAndName(username, depositName)
+                .publishOn(Schedulers.boundedElastic())
+                .doOnNext(deletedDeposit -> transactionsClient.deleteTransaction(token, deletedDeposit.getTransactionNumber()).subscribe())
                 .doOnNext(deletedDeposit ->
                         log.info("Deposit with name={} and username={} deleted.", deletedDeposit.getName(), deletedDeposit.getUsername()));
     }
@@ -84,24 +94,6 @@ public class DepositService {
             log.info("User don't enough money to perform transaction");
             return false;
         }
-    }
-
-    private static TransactionDto toTransactionDto(final Deposit deposit) {
-        return TransactionDto.builder()
-                .user(deposit.getUsername())
-                .category(Category.Type.ASSET.toString())
-                .type(EXPENSE.toString())
-                .amount(deposit.getValue())
-                .date(LocalDate.now())
-                .description(prepareDescription(deposit))
-                .build();
-    }
-
-    private static String prepareDescription(final Deposit deposit) {
-        final String description = StringUtils.isBlank(deposit.getBankName()) ?
-                "%s deposit".formatted(deposit.getName()) :
-                "%s deposit in %s".formatted(deposit.getName(), deposit.getBankName());
-        return description.substring(0, 1).toUpperCase() + description.substring(1);
     }
 
     private static CategoryDto prepareAssetsCategory(final DepositDto depositDto) {

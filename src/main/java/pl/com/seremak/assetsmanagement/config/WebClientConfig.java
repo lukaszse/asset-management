@@ -13,6 +13,9 @@ public class WebClientConfig {
     @Value("${custom-properties.billsPlanUrl}")
     private String billsPlanUrl;
 
+    @Value("${custom-properties.simpleBillsUrl}")
+    private String simpleBillsUrl;
+
 
     @Bean
     public WebClient balanceClient() {
@@ -22,6 +25,11 @@ public class WebClientConfig {
     @Bean
     public WebClient categoryClient() {
         return createClient(billsPlanUrl, "/categories");
+    }
+
+    @Bean
+    public WebClient transactionClient() {
+        return createClient(simpleBillsUrl, "/transactions");
     }
 
     private static WebClient createClient(final String baseUrl, final String endpoint) {

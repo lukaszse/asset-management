@@ -16,21 +16,21 @@ import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 
+import static pl.com.seremak.assetsmanagement.utils.HttpClientUtils.URI_SEPARATOR;
+import static pl.com.seremak.assetsmanagement.utils.HttpClientUtils.prepareBearerToken;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class BillsPlanClient {
 
-    public static final String BEARER_TOKEN_PATTERN = "Bearer %s";
-    public static final String URI_SEPARATOR = "/%s";
     private final WebClient balanceClient;
     private final WebClient categoryClient;
 
 
     public Mono<Balance> getBalance(final Jwt token) {
-        final String bearerToken = BEARER_TOKEN_PATTERN.formatted(token.getTokenValue());
         return balanceClient.get()
-                .header(HttpHeaders.AUTHORIZATION, bearerToken)
+                .header(HttpHeaders.AUTHORIZATION, prepareBearerToken(token))
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(Balance.class)
@@ -40,10 +40,9 @@ public class BillsPlanClient {
     public Mono<Category> getCategory(final Jwt token,
                                       final String username,
                                       final String categoryName) {
-        final String bearerToken = BEARER_TOKEN_PATTERN.formatted(token.getTokenValue());
         return categoryClient.get()
                 .uri(URI_SEPARATOR.formatted(categoryName))
-                .header(HttpHeaders.AUTHORIZATION, bearerToken)
+                .header(HttpHeaders.AUTHORIZATION, prepareBearerToken(token))
                 .retrieve()
                 .bodyToMono(Category.class)
                 .doOnNext(retrievedCategory -> log.info("Category with username={} and name={} retrieved.",
@@ -52,9 +51,8 @@ public class BillsPlanClient {
     }
 
     public Mono<Category> createCategory(final Jwt token, final CategoryDto categoryDto) {
-        final String bearerToken = BEARER_TOKEN_PATTERN.formatted(token.getTokenValue());
         return categoryClient.post()
-                .header(HttpHeaders.AUTHORIZATION, bearerToken)
+                .header(HttpHeaders.AUTHORIZATION, prepareBearerToken(token))
                 .body(Mono.just(categoryDto), CategoryDto.class)
                 .retrieve()
                 .bodyToMono(Category.class)
