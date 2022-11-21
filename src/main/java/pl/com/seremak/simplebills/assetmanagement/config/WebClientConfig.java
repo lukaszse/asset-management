@@ -10,26 +10,26 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class WebClientConfig {
 
     private static final String URL_PATTERN = "%s%s";
-    @Value("${custom-properties.billsPlanUrl}")
-    private String billsPlanUrl;
+    @Value("${custom-properties.planning-url}")
+    private String planningUrl;
 
-    @Value("${custom-properties.simpleBillsUrl}")
-    private String simpleBillsUrl;
+    @Value("${custom-properties.transaction-url}")
+    private String transactionUrl;
 
 
     @Bean
     public WebClient balanceClient() {
-        return createClient(billsPlanUrl, "/balance");
+        return createClient(planningUrl, "/balance");
     }
 
     @Bean
     public WebClient categoryClient() {
-        return createClient(billsPlanUrl, "/categories");
+        return createClient(planningUrl, "/categories");
     }
 
     @Bean
     public WebClient transactionClient() {
-        return createClient(simpleBillsUrl, "/transactions");
+        return createClient(transactionUrl, "/transactions");
     }
 
     private static WebClient createClient(final String baseUrl, final String endpoint) {
