@@ -17,7 +17,16 @@ public class DepositSearchRepository {
 
     private final ReactiveMongoTemplate reactiveMongoTemplate;
 
-    public Mono<Deposit> updateDeposit(final Deposit deposit) {
+    public Mono<Deposit> updateDepositByName(final Deposit deposit) {
+        return reactiveMongoTemplate.findAndModify(
+                prepareFindDepositQuery(deposit.getUsername(), deposit.getName()),
+                MongoQueryHelper.preparePartialUpdateQuery(deposit, Deposit.class),
+                new FindAndModifyOptions().returnNew(true),
+                Deposit.class
+        );
+    }
+
+    public Mono<Deposit> updateDepositByTransactionNumber(final Deposit deposit) {
         return reactiveMongoTemplate.findAndModify(
                 prepareFindDepositQuery(deposit.getUsername(), deposit.getName()),
                 MongoQueryHelper.preparePartialUpdateQuery(deposit, Deposit.class),

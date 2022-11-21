@@ -12,6 +12,8 @@ import pl.com.seremak.assetsmanagement.repository.DepositRepository;
 import pl.com.seremak.assetsmanagement.repository.DepositSearchRepository;
 import pl.com.seremak.simplebills.commons.dto.http.CategoryDto;
 import pl.com.seremak.simplebills.commons.dto.http.DepositDto;
+import pl.com.seremak.simplebills.commons.dto.queue.TransactionEventDto;
+import pl.com.seremak.simplebills.commons.exceptions.WrongPayloadException;
 import pl.com.seremak.simplebills.commons.model.Balance;
 import pl.com.seremak.simplebills.commons.model.Category;
 import pl.com.seremak.simplebills.commons.model.Deposit;
@@ -30,12 +32,23 @@ import static pl.com.seremak.simplebills.commons.model.Transaction.Type.EXPENSE;
 @Service
 @RequiredArgsConstructor
 public class DepositService {
-
+    public static final String WRONG_ASSET_TRANSACTION_MESSAGE_PAYLOAD_ERROR_MSG =
+            "Wrong message payload. Asset transaction event cannot have `CREATION` type";
     private final DepositRepository depositRepository;
+
     private final DepositSearchRepository depositSearchRepository;
     private final BillsPlanClient billsPlanClient;
     private final TransactionsClient transactionsClient;
 
+
+    public void handleTransactionEvent(final TransactionEventDto transactionEventDto) {
+        final Mono<Deposit> transactionAction = switch (transactionEventDto.getType()) {
+            case UPDATE -> updateDeposit(transactionEventDto);
+            case DELETION -> deleteDeposit(transactionEventDto);
+            case CREATION -> throw new WrongPayloadException(WRONG_ASSET_TRANSACTION_MESSAGE_PAYLOAD_ERROR_MSG);
+        };
+        transactionAction.subscribe();
+    }
 
     public Mono<List<Deposit>> findAllDeposits(final String username) {
         return depositRepository.findAllByUsername(username)
@@ -69,9 +82,17 @@ public class DepositService {
         final String username = JwtExtractionHelper.extractUsername(principal);
         final Jwt token = principal.getToken();
         final Deposit deposit = toDeposit(username, depositName, depositDto);
-        return depositSearchRepository.updateDeposit(deposit)
+        return depositSearchRepository.updateDepositByName(deposit)
                 .publishOn(Schedulers.boundedElastic())
                 .doOnNext(updatedDeposit -> transactionsClient.updateTransaction(token, toTransactionDto(updatedDeposit)).subscribe())
+                .doOnNext(updatedDeposit ->
+                        log.info("Deposit with name={} and username={} updated.", updatedDeposit.getName(), updatedDeposit.getUsername()));
+    }
+
+    public Mono<Deposit> updateDeposit(final TransactionEventDto transactionEventDto) {
+        final Deposit deposit = toDeposit(transactionEventDto);
+        return depositSearchRepository.updateDepositByTransactionNumber(deposit)
+                .publishOn(Schedulers.boundedElastic())
                 .doOnNext(updatedDeposit ->
                         log.info("Deposit with name={} and username={} updated.", updatedDeposit.getName(), updatedDeposit.getUsername()));
     }
@@ -82,6 +103,16 @@ public class DepositService {
         return depositRepository.deleteByUsernameAndName(username, depositName)
                 .publishOn(Schedulers.boundedElastic())
                 .doOnNext(deletedDeposit -> transactionsClient.deleteTransaction(token, deletedDeposit.getTransactionNumber()).subscribe())
+                .doOnNext(deletedDeposit ->
+                        log.info("Deposit with name={} and username={} deleted.", deletedDeposit.getName(), deletedDeposit.getUsername()));
+    }
+
+    public Mono<Deposit> deleteDeposit(final TransactionEventDto transactionEventDto) {
+
+        return depositRepository.deleteByUsernameAndTransactionNumber(
+                        transactionEventDto.getUsername(),
+                        transactionEventDto.getTransactionNumber())
+                .publishOn(Schedulers.boundedElastic())
                 .doOnNext(deletedDeposit ->
                         log.info("Deposit with name={} and username={} deleted.", deletedDeposit.getName(), deletedDeposit.getUsername()));
     }
