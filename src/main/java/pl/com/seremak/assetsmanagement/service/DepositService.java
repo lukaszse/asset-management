@@ -3,6 +3,7 @@ package pl.com.seremak.assetsmanagement.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,7 @@ public class DepositService {
 
 
     public void handleTransactionEvent(final TransactionEventDto transactionEventDto) {
+        validateAssetTransactionEventDto(transactionEventDto);
         final Mono<Deposit> transactionAction = switch (transactionEventDto.getType()) {
             case UPDATE -> updateDeposit(transactionEventDto);
             case DELETION -> deleteDeposit(transactionEventDto);
@@ -133,5 +135,11 @@ public class DepositService {
                 .transactionType(EXPENSE.toString())
                 .name(Category.Type.ASSET.toString().toLowerCase())
                 .build();
+    }
+
+    private static void validateAssetTransactionEventDto(final TransactionEventDto transactionEventDto) {
+        if (!StringUtils.equalsIgnoreCase(Category.Type.ASSET.toString(), transactionEventDto.getCategoryName())) {
+            throw new WrongPayloadException("Wrong message payload. Asset transaction should have `ASSET` category");
+        }
     }
 }
