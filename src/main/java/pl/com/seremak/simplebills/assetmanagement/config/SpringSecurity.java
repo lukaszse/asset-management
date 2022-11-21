@@ -1,4 +1,4 @@
-package pl.com.seremak.assetsmanagement.config;
+package pl.com.seremak.simplebills.assetmanagement.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

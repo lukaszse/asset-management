@@ -1,11 +1,11 @@
-package pl.com.seremak.assetsmanagement.messageQueue;
+package pl.com.seremak.simplebills.assetmanagement.messageQueue;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
-import pl.com.seremak.assetsmanagement.service.DepositService;
+import pl.com.seremak.simplebills.assetmanagement.service.DepositService;
 import pl.com.seremak.simplebills.commons.dto.queue.TransactionEventDto;
 
 import static pl.com.seremak.simplebills.commons.constants.MessageQueue.TRANSACTION_EVENT_ASSETS_MANAGEMENT_QUEUE;

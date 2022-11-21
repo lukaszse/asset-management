@@ -1,4 +1,4 @@
-package pl.com.seremak.assetsmanagement.config;
+package pl.com.seremak.simplebills.assetmanagement.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -97,8 +97,8 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    Binding transactionsEventsAssetsManagementBinding(final Queue transactionEventBillsPlanningQueue,
-                                                      final DirectExchange exchange) {
+    Binding transactionsEventsAssetManagementBinding(final Queue transactionEventBillsPlanningQueue,
+                                                     final DirectExchange exchange) {
         return BindingBuilder
                 .bind(transactionEventBillsPlanningQueue)
                 .to(exchange)

@@ -1,4 +1,4 @@
-package pl.com.seremak.assetsmanagement.endpoint;
+package pl.com.seremak.simplebills.assetmanagement.endpoint;
 
 
 import lombok.RequiredArgsConstructor;
@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
-import pl.com.seremak.assetsmanagement.service.DepositService;
+import pl.com.seremak.simplebills.assetmanagement.service.DepositService;
 import pl.com.seremak.simplebills.commons.dto.http.DepositDto;
 import pl.com.seremak.simplebills.commons.model.Deposit;
 import pl.com.seremak.simplebills.commons.utils.JwtExtractionHelper;

@@ -1,4 +1,4 @@
-package pl.com.seremak.assetsmanagement.utils;
+package pl.com.seremak.simplebills.assetmanagement.utils;
 
 import org.springframework.security.oauth2.jwt.Jwt;
 

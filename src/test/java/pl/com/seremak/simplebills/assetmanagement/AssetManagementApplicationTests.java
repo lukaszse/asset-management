@@ -1,10 +1,10 @@
-package pl.com.seremak.assetsmanagement;
+package pl.com.seremak.simplebills.assetmanagement;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class AssetsManagementApplicationTests {
+class AssetManagementApplicationTests {
 
 	@Test
 	void contextLoads() {

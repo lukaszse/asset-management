@@ -1,4 +1,4 @@
-package pl.com.seremak.assetsmanagement.config;
+package pl.com.seremak.simplebills.assetmanagement.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;

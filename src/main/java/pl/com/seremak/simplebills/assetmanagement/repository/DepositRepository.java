@@ -1,4 +1,4 @@
-package pl.com.seremak.assetsmanagement.repository;
+package pl.com.seremak.simplebills.assetmanagement.repository;
 
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;

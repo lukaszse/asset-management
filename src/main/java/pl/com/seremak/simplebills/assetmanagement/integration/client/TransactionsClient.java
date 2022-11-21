@@ -1,4 +1,4 @@
-package pl.com.seremak.assetsmanagement.integration.client;
+package pl.com.seremak.simplebills.assetmanagement.integration.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,8 +10,8 @@ import pl.com.seremak.simplebills.commons.dto.http.TransactionDto;
 import pl.com.seremak.simplebills.commons.model.Transaction;
 import reactor.core.publisher.Mono;
 
-import static pl.com.seremak.assetsmanagement.utils.HttpClientUtils.URI_SEPARATOR;
-import static pl.com.seremak.assetsmanagement.utils.HttpClientUtils.prepareBearerToken;
+import static pl.com.seremak.simplebills.assetmanagement.utils.HttpClientUtils.URI_SEPARATOR;
+import static pl.com.seremak.simplebills.assetmanagement.utils.HttpClientUtils.prepareBearerToken;
 
 @Slf4j
 @Component

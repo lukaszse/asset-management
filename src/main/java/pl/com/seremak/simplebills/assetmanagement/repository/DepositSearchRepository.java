@@ -1,4 +1,4 @@
-package pl.com.seremak.assetsmanagement.repository;
+package pl.com.seremak.simplebills.assetmanagement.repository;
 
 
 import lombok.RequiredArgsConstructor;

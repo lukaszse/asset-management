@@ -1,4 +1,4 @@
-package pl.com.seremak.assetsmanagement.service;
+package pl.com.seremak.simplebills.assetmanagement.service;
 
 
 import lombok.RequiredArgsConstructor;
@@ -7,10 +7,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
-import pl.com.seremak.assetsmanagement.integration.client.BillsPlanClient;
-import pl.com.seremak.assetsmanagement.integration.client.TransactionsClient;
-import pl.com.seremak.assetsmanagement.repository.DepositRepository;
-import pl.com.seremak.assetsmanagement.repository.DepositSearchRepository;
+import pl.com.seremak.simplebills.assetmanagement.integration.client.BillsPlanClient;
+import pl.com.seremak.simplebills.assetmanagement.integration.client.TransactionsClient;
+import pl.com.seremak.simplebills.assetmanagement.repository.DepositRepository;
+import pl.com.seremak.simplebills.assetmanagement.repository.DepositSearchRepository;
 import pl.com.seremak.simplebills.commons.dto.http.CategoryDto;
 import pl.com.seremak.simplebills.commons.dto.http.DepositDto;
 import pl.com.seremak.simplebills.commons.dto.queue.TransactionEventDto;
@@ -70,7 +70,7 @@ public class DepositService {
         return billsPlanClient.getBalance(token)
                 .filter(balance -> validateBalance(balance, depositDto.getValue()))
                 .then(billsPlanClient.getCategory(token, username, Category.Type.ASSET.toString().toLowerCase())
-                        .switchIfEmpty(billsPlanClient.createCategory(token, prepareAssetsCategory(depositDto))))
+                        .switchIfEmpty(billsPlanClient.createCategory(token, prepareAssetCategory(depositDto))))
                 .then(transactionsClient.createTransaction(token, toTransactionDto(depositDto)))
                 .map(depositTransaction -> toDeposit(username, depositTransaction.getTransactionNumber(), depositDto))
                 .flatMap(depositRepository::save)
@@ -129,7 +129,7 @@ public class DepositService {
         }
     }
 
-    private static CategoryDto prepareAssetsCategory(final DepositDto depositDto) {
+    private static CategoryDto prepareAssetCategory(final DepositDto depositDto) {
         return CategoryDto.builder()
                 .type(Category.Type.ASSET)
                 .transactionType(EXPENSE.toString())
